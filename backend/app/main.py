@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers import ROUTERS
+from app.services.circuit_board import circuit_board
 from app.store import store
 
 app = FastAPI(title="市政道路桥梁养护管理平台", version="1.0.0")
@@ -24,6 +25,12 @@ app.add_middleware(
 
 for module in ROUTERS:
     app.include_router(module.router)
+
+
+@app.on_event("startup")
+def bootstrap_circuit_board() -> None:
+    """启动时播种回路棋盘：测光→复核→下发的演示回路与已归档历史版本。"""
+    circuit_board.bootstrap()
 
 
 @app.get("/api/health")
